@@ -144,6 +144,38 @@ void mascaraIdFicha(int idFicha, int bitPosicion, unsigned char *&masc_1, unsign
 
     }
 }
+void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, int numColumnas){
+    int *byte_1=nullptr, *byte_2=nullptr;//x_1=x-1
+    int bitPosicion;
+    unsigned char *masc_1=nullptr,*masc_2=nullptr;
+    bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
+                 //cuantos bits por columna + 
+    mascaraIdFicha(idFicha,bitPosicion,masc_1,masc_2);//
+
+    indicesBytes(bitPosicion,byte_1,byte_2);
+
+    if (byte_2 != nullptr) {//
+        tablero[*byte_1]^=*masc_1;
+        tablero[*byte_2]^=*masc_2;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+    } else {
+
+        tablero[*byte_1]^=*masc_1;
+//cout<<"byte_1: "<<*byte_1<<endl;
+//imprimirTresBitsInferiores(tablero[*byte_1]);
+//cout <<tablero[*byte_1]<<endl;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+    }
+
+
+}
+
 void crearTablero(int numFilas, int numColumnas, unsigned char *&tablero) {
     int totalBits = numFilas * numColumnas * 3;
     int numBytes = (totalBits + 7) / 8;
@@ -151,6 +183,16 @@ void crearTablero(int numFilas, int numColumnas, unsigned char *&tablero) {
 
     for (int i = 0; i < numBytes; ++i) {
         tablero[i] = 0;
+    }
+}
+void rellenarTablero(int filas, int columnas, unsigned char *&tablero) {
+    int n=9;
+    for (int i = 0; i < filas; ++i) {
+        for (int j = 0; j < columnas; ++j) {
+            int idFicha = rand() % 6; // Genera un número aleatorio entre 0 y 5
+            InsertarFicha(idFicha, tablero, i, j, columnas);
+            
+        }
     }
 }
 void borrarBit(int posBit, unsigned char &byte) {
@@ -190,61 +232,47 @@ unsigned char ByteFicha(int fila, int columna,int numColumnas, unsigned char *& 
     unsigned char temp = 0;
 
     switch (opcion) {
-    case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x-1]
+    case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
-        borrarBit(3, temp);
+/*        borrarBit(3, temp);
         borrarBit(4, temp);
         borrarBit(5, temp);
         borrarBit(6, temp);
-        borrarBit(7, temp);
+        borrarBit(7, temp);*/
         letra = letra ^ temp;//0000000x ^ 00000xx0=00000xxx
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 2: // 0.25 (bitFicha 10, 18, etc. donde 10%8 = 2) -> cruza byte [x] y x+1
         letra = tablero[bitFicha/8] << 2;
         temp = tablero[((bitFicha/8)+1)] >> 6;
-        borrarBit(3, temp);
-        borrarBit(4, temp);
-        borrarBit(5, temp);
-        borrarBit(6, temp);
-        borrarBit(7, temp);
         letra = letra ^ temp;//000000xx ^ 00000x00=00000xxx
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
         //                                xxx00000
         letra = tablero[bitFicha/8] >> 5;//00000xxx
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 4: // 0.5 (bitFicha 12, 20...) -> cruza o empieza en offset 4
         letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
-        borrarBit(3, letra);
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 5: // 0.625 (bitFicha 5, 13, 21...)
         letra = tablero[bitFicha/8] >> 3;
-        borrarBit(3, letra);
-        borrarBit(4, letra);
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 6: // 0.75 (bitFicha 6, 14, 22...)
         letra = tablero[bitFicha/8] >> 2;//0000 0000
-
-
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 7: // 0.875 (bitFicha 7, 15, 23...)
         letra = tablero[bitFicha/8] >> 1;
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
-        borrarBit(6, letra);
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
         letra = tablero[bitFicha/8];//00000xxx
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
-        borrarBit(6, letra);
-        borrarBit(7, letra);
+        letra=letra & 0b00000111;//00000xxx
         return letra;
     default:
         std::cout << "El valor ingresado no es válido.\n";
@@ -288,12 +316,8 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
-        borrarBit(3, temp);
-        borrarBit(4, temp);
-        borrarBit(5, temp);
-        borrarBit(6, temp);
-        borrarBit(7, temp);
         letra = letra ^ temp;//00000xx0 ^ 0000000x=00000xxx
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
         //                                                   
@@ -301,54 +325,39 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     case 2: // 0.25 (bitFicha 18, etc. donde 18%8 = 2) -> cruza byte [x] y [x+1]
         letra = tablero[bitFicha/8] << 2;//00000x->00000x00
         temp = tablero[((bitFicha/8)+1)] >> 6;//xx000000->000000xx
-        borrarBit(3, temp);
-        borrarBit(4, temp);
-        borrarBit(5, temp);
-        borrarBit(6, temp);
-        borrarBit(7, temp);
         letra = letra ^ temp;//00000x00 ^ 000000xx=00000xxx
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
         //                                xxx00000
         letra = tablero[bitFicha/8] >> 5;//00000xxx
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 4: // 0.5 (bitFicha 12, 20...) -> 
         letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
-        borrarBit(3, letra);
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 5: // 0.625 (bitFicha 5, 13, 21...)
         letra = tablero[bitFicha/8] >> 3;
-        borrarBit(3, letra);
-        borrarBit(4, letra);
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 6: // 0.75 (bitFicha 6, 14, 22...)
         letra = tablero[bitFicha/8] >> 2;//0000 0000
-
-
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 7: // 0.875 (bitFicha 7, 15, 23...)
         letra = tablero[bitFicha/8] >> 1;
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
-        borrarBit(6, letra);
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
         letra = tablero[bitFicha/8];//00000xxx
-        borrarBit(3, letra);
-        borrarBit(4, letra);
-        borrarBit(5, letra);
-        borrarBit(6, letra);
-        borrarBit(7, letra);
+        letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     default:
@@ -381,7 +390,7 @@ void imprimirTablero(int numFilas, int numColumnas, unsigned char *&tablero){
     for (int i = 3; i <= totalFichas*3;){
         bitFicha = i;
         coordenadasSegunBit(bitFicha,fila,columna,numColumnas);
-        byteBinario(ByteFicha(*fila, *columna, numColumnas,tablero));
+      //  byteBinario(ByteFicha(*fila, *columna, numColumnas,tablero));
         cout << ' ';
         cout << fichaID(ByteFicha(*fila, *columna, numColumnas,tablero)) << ' ';
   //      imprimirTresBitsInferiores(ByteFicha(*fila, *columna, numColumnas,tablero));
@@ -393,38 +402,6 @@ void imprimirTablero(int numFilas, int numColumnas, unsigned char *&tablero){
     cout << endl;
     delete columna;
     delete fila;
-}
-void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, int numColumnas){
-    int *byte_1=nullptr;
-    int *byte_2=nullptr;//x_1=x-1
-    int bitPosicion;
-    unsigned char *masc_1=nullptr,*masc_2=nullptr;
-    bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//00->1,1->col*3,
-
-    mascaraIdFicha(idFicha,bitPosicion,masc_1,masc_2);//mas_1=00xxx000
-
-    indicesBytes(bitPosicion,byte_1,byte_2);
-
-    if (byte_2 != nullptr) {//
-        tablero[*byte_1]^=*masc_1;
-        tablero[*byte_2]^=*masc_2;
-        delete byte_1;
-        delete byte_2;
-        delete masc_1;
-        delete masc_2;
-    } else {
-
-        tablero[*byte_1]^=*masc_1;
-//cout<<"byte_1: "<<*byte_1<<endl;
-//imprimirTresBitsInferiores(tablero[*byte_1]);
-//cout <<tablero[*byte_1]<<endl;
-        delete byte_1;
-        delete byte_2;
-        delete masc_1;
-        delete masc_2;
-    }
-
-
 }
 void ImprimirTableroEnBits(int numFilas, int numColumnas, unsigned char *&tablero){
     int totalFichas = numFilas * numColumnas;

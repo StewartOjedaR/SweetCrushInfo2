@@ -3,17 +3,22 @@
 using namespace std;
 int main() {
     unsigned char *tablero = nullptr;
-    crearTablero(5, 6, tablero);
-    imprimirTablero(5, 6, tablero);
-    InsertarFicha(5,tablero,4,5,6);
-    InsertarFicha(5,tablero,4,4,6);
-    InsertarFicha(5,tablero,3,5,6);
-    InsertarFicha(5,tablero,2,5,6);
-    InsertarFicha(5,tablero,1,5,6);
-        InsertarFicha(5,tablero,3,0,6);
-    InsertarFicha(5,tablero,2,1,6);
-    imprimirTablero(5, 6, tablero);
-    ImprimirTableroEnBits(5, 6, tablero);
+    crearTablero(5, 7, tablero);
+    imprimirTablero(5, 7, tablero);
+rellenarTablero(5, 7, tablero);
+    imprimirTablero(5, 7, tablero);
+ /* for (int i = 0; i < 5; ++i) {
+        for (int j = 0; j < 7; ++j) {
+            InsertarFicha(5, tablero, i, j, 7);
+        }
+    }*/
+        for(int i=0;i<((7*5*3)+7)/8;i++){
+        byteBinario(tablero[i]);
+        cout<<"byte["<<i<<"]"<<endl;
+
+    }
+    imprimirTablero(5, 7, tablero);
+    ImprimirTableroEnBits(5, 7, tablero);
 
 
     delete[] tablero;
