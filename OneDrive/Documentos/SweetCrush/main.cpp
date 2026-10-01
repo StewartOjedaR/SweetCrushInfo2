@@ -2,24 +2,19 @@
 #include "funciones.h"
 using namespace std;
 int main() {
+    int filas = 5;
+    int columnas = 7;
     unsigned char *tablero = nullptr;
-    crearTablero(5, 7, tablero);
-    imprimirTablero(5, 7, tablero);
-rellenarTablero(5, 7, tablero);
-    imprimirTablero(5, 7, tablero);
- /* for (int i = 0; i < 5; ++i) {
-        for (int j = 0; j < 7; ++j) {
-            InsertarFicha(5, tablero, i, j, 7);
-        }
-    }*/
-        for(int i=0;i<((7*5*3)+7)/8;i++){
-        byteBinario(tablero[i]);
-        cout<<"byte["<<i<<"]"<<endl;
+    crearTablero(filas, columnas, tablero);
+    imprimirTablero(filas, columnas, tablero);
+    rellenarTablero(filas, columnas, tablero);
+    imprimirTablero(filas, columnas, tablero);
+    borrarFicha(tablero, 2, 3, columnas);
+    borrarFicha(tablero, 1, 3, columnas);
 
-    }
-    imprimirTablero(5, 7, tablero);
-    ImprimirTableroEnBits(5, 7, tablero);
-
+    imprimirTablero(filas, columnas, tablero);
+aplicarGraverdad(tablero, filas, columnas);
+    imprimirTablero(filas, columnas, tablero);
 
     delete[] tablero;
 

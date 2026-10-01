@@ -11,7 +11,13 @@ for (int i=(sizeof(a)*8)-1;i>=0;i--){
     } if (i%4==0){cout<<' ';
 }}
 }
+void imprimirByteArreglo(int fila, int columna, int numColumnas, unsigned char *&tablero){
+            for(int i=0;i<((numColumnas*fila*3)+numColumnas)/8;i++){
+        byteBinario(tablero[i]);
+        cout<<"byte["<<i<<"]"<<endl;
 
+    }
+}
 unsigned char fichaID(unsigned char byte) {
     switch (byte) {
     case 0b00000000:
@@ -29,7 +35,7 @@ unsigned char fichaID(unsigned char byte) {
     case 0b00000110:
         return '*';
     case 0b00000111:
-        return '+';
+        return ' ';
     default:
         return ' ';
     }
@@ -110,31 +116,32 @@ void mascaraIdFicha(int idFicha, int bitPosicion, unsigned char *&masc_1, unsign
         case 3://mascara_1 = new unsigned char(ficha);//0.375//
             masc_1 = new unsigned char(ficha);//00000xxx
             *masc_1=*masc_1 << 5;//xxx00000
-
+            masc_2=nullptr;
             break;
         case 4://mascara_1 = new unsigned char(ficha);//0.5
             masc_1 = new unsigned char(ficha);//00000xxx
             *masc_1=*masc_1 << 4;//0xxx0000
-
+            masc_2=nullptr;
             break;
         case 5://mascara_1 = new unsigned char(ficha);//0.625
             masc_1 = new unsigned char(ficha);//00000xxx
             *masc_1=*masc_1 << 3;//00xxx000
-
+            masc_2=nullptr;
             break;
         case 6://mascara_1 = new unsigned char(ficha);//0.75
             masc_1 = new unsigned char(ficha);//00000xxx
             *masc_1=*masc_1 << 2;//000xxx00
-
+            masc_2=nullptr;
             break;
         case 7://mascara_1 = new unsigned char(ficha);//0.875
             masc_1 = new unsigned char(ficha);//00000xxx
             *masc_1=*masc_1 << 1;//0000xxx0
-
+            masc_2=nullptr;
             break;
         case 0://mascara_1 = new unsigned char(ficha);//
 
             masc_1 = new unsigned char(ficha);//00000xxx
+            masc_2=nullptr;
          // imprimirTresBitsInferiores(*masc_1);
             break;
         default:
@@ -147,30 +154,28 @@ void mascaraIdFicha(int idFicha, int bitPosicion, unsigned char *&masc_1, unsign
 void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, int numColumnas){
     int *byte_1=nullptr, *byte_2=nullptr;//x_1=x-1
     int bitPosicion;
-    unsigned char *masc_1=nullptr,*masc_2=nullptr;
+    unsigned char *masc_1=nullptr,*masc_2=nullptr, *mascTemp_1=nullptr,*mascTemp_2=nullptr;
     bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
                  //cuantos bits por columna + 
     mascaraIdFicha(idFicha,bitPosicion,masc_1,masc_2);//
+ //   mascaraIdFicha(0b111,bitPosicion,mascTemp_1,mascTemp_2);//mascTemp_1 devuelve una ficha a aplicar ,mascTemp_2
 
     indicesBytes(bitPosicion,byte_1,byte_2);
-
     if (byte_2 != nullptr) {//
+     //   tablero[*byte_1]&=(~*mascTemp_1);//
+    //    tablero[*byte_2]&=(~*mascTemp_2);
         tablero[*byte_1]^=*masc_1;
         tablero[*byte_2]^=*masc_2;
-        delete byte_1;
-        delete byte_2;
-        delete masc_1;
-        delete masc_2;
+        delete byte_1, byte_2, masc_1, masc_2, mascTemp_1, mascTemp_2;
+ 
     } else {
-
+       // tablero[*byte_1]&=(~*mascTemp_1);
         tablero[*byte_1]^=*masc_1;
+    //    byteBinario((tablero[*byte_1]));
 //cout<<"byte_1: "<<*byte_1<<endl;
 //imprimirTresBitsInferiores(tablero[*byte_1]);
 //cout <<tablero[*byte_1]<<endl;
-        delete byte_1;
-        delete byte_2;
-        delete masc_1;
-        delete masc_2;
+        delete byte_1, byte_2, masc_1, masc_2, mascTemp_1, mascTemp_2;
     }
 
 
@@ -186,7 +191,6 @@ void crearTablero(int numFilas, int numColumnas, unsigned char *&tablero) {
     }
 }
 void rellenarTablero(int filas, int columnas, unsigned char *&tablero) {
-    int n=9;
     for (int i = 0; i < filas; ++i) {
         for (int j = 0; j < columnas; ++j) {
             int idFicha = rand() % 6; // Genera un número aleatorio entre 0 y 5
@@ -226,20 +230,15 @@ unsigned char ByteFicha(int fila, int columna,int numColumnas, unsigned char *& 
 
 *///               (1+1)*3=6+18=24
     int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));//
-    int opcion = bitFicha % 8;
     bitFicha=bitFicha-3;
     unsigned char letra = '\0';
     unsigned char temp = 0;
 
-    switch (opcion) {
+    switch (((bitFicha+3) % 8)) {
+    
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
-/*        borrarBit(3, temp);
-        borrarBit(4, temp);
-        borrarBit(5, temp);
-        borrarBit(6, temp);
-        borrarBit(7, temp);*/
         letra = letra ^ temp;//0000000x ^ 00000xx0=00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
@@ -306,13 +305,12 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     2,2 =(fila+1), (col+1), numColum=6,->
 
 *///               (1+1)*3=6+18=24
-    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));//
-    int opcion = bitFicha % 8;
+    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));
     bitFicha=bitFicha-3;
     unsigned char letra = '\0';
     unsigned char temp = 0;
 
-    switch (opcion) {                                         //[0000 00xx] [x000 000]
+    switch ((bitFicha+3) % 8) {                                         //[0000 00xx] [x000 000]
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
@@ -363,6 +361,53 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     default:
         std::cout << "El valor ingresado no es válido.\n";
         break;
+    }
+}
+unsigned char FichaPorCoord (int fila, int columna,int numColumnas, unsigned char *& tablero) {
+    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));
+    bitFicha=bitFicha-3;
+    unsigned char letra, temp;
+    switch ((bitFicha+3) % 8) {                                         //[0000 00xx] [x000 000]
+    case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
+        letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
+        temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
+        letra = letra ^ temp;//00000xx0 ^ 0000000x=00000xxx
+        letra=letra & 0b00000111;//00000xxx
+        return letra;//                                           [0000 000x]      [xx000000]
+    case 2: // 0.25 (bitFicha 18, etc. donde 18%8 = 2) -> cruza byte [x] y [x+1]
+        letra = tablero[bitFicha/8] << 2;//00000x->00000x00
+        temp = tablero[((bitFicha/8)+1)] >> 6;//xx000000->000000xx
+        letra = letra ^ temp;//00000x00 ^ 000000xx=00000xxx
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
+        //                                xxx00000
+        letra = tablero[bitFicha/8] >> 5;//00000xxx
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 4: // 0.5 (bitFicha 12, 20...) -> 
+        letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 5: // 0.625 (bitFicha 5, 13, 21...)
+        letra = tablero[bitFicha/8] >> 3;
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 6: // 0.75 (bitFicha 6, 14, 22...)
+        letra = tablero[bitFicha/8] >> 2;//0000 0000
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 7: // 0.875 (bitFicha 7, 15, 23...)
+        letra = tablero[bitFicha/8] >> 1;
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
+        letra = tablero[bitFicha/8];//00000xxx
+        letra=letra & 0b00000111;//00000xxx
+        return letra;
+    default:
+        std::cout << "El valor ingresado no es válido.\n";
+        return 0;
     }
 }
 void coordenadasSegunBit(int bitFicha, int *&fila, int *&columna, int numColumnas) {
@@ -423,5 +468,57 @@ void ImprimirTableroEnBits(int numFilas, int numColumnas, unsigned char *&tabler
     delete columna;
     delete fila;
 }
+void borrarFicha(unsigned char* tablero,int fila, int columna, int numColumnas){
+    int *byte_1=nullptr, *byte_2=nullptr;//x_1=x-1
+    int bitPosicion;
+    unsigned char *masc_1=nullptr,*masc_2=nullptr;
+    bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
+                 //cuantos bits por columna + 
+    mascaraIdFicha(0b111,bitPosicion,masc_1,masc_2);//
 
+    indicesBytes(bitPosicion,byte_1,byte_2);
+    unsigned char temp;
+    if (byte_2 != nullptr) {//
+        temp=(~*masc_1);
+        tablero[*byte_1]&=temp;
+        tablero[*byte_1]^=*masc_1;
+        temp=(~*masc_2);
+        tablero[*byte_2]&=temp;
+        tablero[*byte_2]^=*masc_2;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+    } else {
+        temp=(~*masc_1);
+        tablero[*byte_1]&=temp;
+        tablero[*byte_1]^=*masc_1;
+//cout<<"byte_1: "<<*byte_1<<endl;
+//imprimirTresBitsInferiores(tablero[*byte_1]);
+//cout <<tablero[*byte_1]<<endl;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+    }
+
+
+}
+void aplicarGraverdad(unsigned char* tablero, int numFilas, int numColumnas) {
+    for (int row = 0; row <  numFilas - 1;++row ) {
+        for (int  col = 0;  col<numColumnas; ++col) {
+            unsigned char fichaActual = FichaPorCoord(row, col, numColumnas, tablero);
+            if (fichaActual == 0b00000111) { // Si la ficha actual está vacía
+                for (int k = row - 1; k >= 0; --k) {
+                    unsigned char fichaArriba = ByteFicha(k, col, numColumnas, tablero);
+                    if (fichaArriba != 0b00000111) { // Si hay una ficha arriba
+                        borrarFicha(tablero, k, col, numColumnas); // Borrar la ficha de arriba
+                        InsertarFicha(fichaArriba, tablero, row, col, numColumnas); // Mover la ficha hacia abajo
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
 #endif // FUNCIONESSWEETCRUSH_H
