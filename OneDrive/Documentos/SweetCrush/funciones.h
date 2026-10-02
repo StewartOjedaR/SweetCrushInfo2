@@ -11,6 +11,11 @@ for (int i=(sizeof(a)*8)-1;i>=0;i--){
     } if (i%4==0){cout<<' ';
 }}
 }
+void apagarBit(int fila, int columna, int filas, int columnas, unsigned char *bitReferencia) {
+//int byte=(((fila*columnas)+columna))/8, bit=(((fila*columnas)+columna))%8;
+bitReferencia[(((fila*columnas)+columna))/8]=bitReferencia[(((fila*columnas)+columna))/8]& ~(1<<7-((((fila*columnas)+columna))%8));
+
+}
 void imprimirByteArreglo(int fila, int columna, int numColumnas, unsigned char *&tablero){
             for(int i=0;i<((numColumnas*fila*3)+numColumnas)/8;i++){
         byteBinario(tablero[i]);
@@ -158,18 +163,18 @@ void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, in
     bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
                  //cuantos bits por columna + 
     mascaraIdFicha(idFicha,bitPosicion,masc_1,masc_2);//
- //   mascaraIdFicha(0b111,bitPosicion,mascTemp_1,mascTemp_2);//mascTemp_1 devuelve una ficha a aplicar ,mascTemp_2
+    mascaraIdFicha(0b111,bitPosicion,mascTemp_1,mascTemp_2);//mascTemp_1 devuelve una ficha a aplicar ,mascTemp_2
 
     indicesBytes(bitPosicion,byte_1,byte_2);
     if (byte_2 != nullptr) {//
-     //   tablero[*byte_1]&=(~*mascTemp_1);//
-    //    tablero[*byte_2]&=(~*mascTemp_2);
+        tablero[*byte_1]&=(~*mascTemp_1);//
+        tablero[*byte_2]&=(~*mascTemp_2);
         tablero[*byte_1]^=*masc_1;
         tablero[*byte_2]^=*masc_2;
         delete byte_1, byte_2, masc_1, masc_2, mascTemp_1, mascTemp_2;
  
     } else {
-       // tablero[*byte_1]&=(~*mascTemp_1);
+        tablero[*byte_1]&=(~*mascTemp_1);
         tablero[*byte_1]^=*masc_1;
     //    byteBinario((tablero[*byte_1]));
 //cout<<"byte_1: "<<*byte_1<<endl;
@@ -180,7 +185,6 @@ void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, in
 
 
 }
-
 void crearTablero(int numFilas, int numColumnas, unsigned char *&tablero) {
     int totalBits = numFilas * numColumnas * 3;
     int numBytes = (totalBits + 7) / 8;
@@ -207,26 +211,26 @@ unsigned char ByteFicha(int fila, int columna,int numColumnas, unsigned char *& 
     // evaluamos el residuo de la posición del bit entre 8 (equivalente a los decimales que buscabas).
     // Posiciones de bits por ficha: 0, 3, 6, 9, 12, 15, 18, 21...
     /*      0+1         1                     0*6=0+(1*3)=3
-     0,0=(fila+1), (col+1), numColum=6,->3 (fila*numColumna)+(columna+1)*3
+     0,0=(fila+1), (columna+1), numColum=6,->3 (fila*numColumna)+(columna+1)*3
             0+1        2                        0*6=0+(2*3)=6
-     0,1=(fila+1), (col+1), numColum=6,->6(fila*numColumna*3)+(columna+1)*3
+     0,1=(fila+1), (columna+1), numColum=6,->6(fila*numColumna*3)+(columna+1)*3
            0+ 1        3                        0*6=0+(3*3)=9
-     0,2=(fila+1), (col+1), numColum=6,->9(fila*numColumna)+(columna+1)*3
+     0,2=(fila+1), (columna+1), numColum=6,->9(fila*numColumna)+(columna+1)*3
 ...
           1+ 1         1                      1*6*3=18+((0+1)*3)=21
-     1,0=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,0=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
            1+1          2                       1*6*3=18+((1+1)*3)=24
-     1,1=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,1=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             1+1        3                     1*6*3=18+((2+1)*3)=27
-     1,2=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,2=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             2         3
-     1,3=(fila+1), (col+1), numColum=6,->
+     1,3=(fila+1), (columna+1), numColum=6,->
 ...         3         1                    2*6*3=36+((0+1)*3)
-     2,0=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     2,0=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             3         2
-     2,1=(fila+1), (col+1), numColum=6,->
+     2,1=(fila+1), (columna+1), numColum=6,->
             3         3
-    2,2 =(fila+1), (col+1), numColum=6,->
+    2,2 =(fila+1), (columna+1), numColum=6,->
 
 *///               (1+1)*3=6+18=24
     int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));//
@@ -283,26 +287,26 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     // evaluamos el residuo de la posición del bit entre 8 (equivalente a los decimales que buscabas).
     // Posiciones de bits por ficha: 0, 3, 6, 9, 12, 15, 18, 21...
     /*      0+1         1                     0*6=0+(1*3)=3
-     0,0=(fila+1), (col+1), numColum=6,->3 (fila*numColumna)+(columna+1)*3
+     0,0=(fila+1), (columna+1), numColum=6,->3 (fila*numColumna)+(columna+1)*3
             0+1        2                        0*6=0+(2*3)=6
-     0,1=(fila+1), (col+1), numColum=6,->6(fila*numColumna*3)+(columna+1)*3
+     0,1=(fila+1), (columna+1), numColum=6,->6(fila*numColumna*3)+(columna+1)*3
            0+ 1        3                        0*6=0+(3*3)=9
-     0,2=(fila+1), (col+1), numColum=6,->9(fila*numColumna)+(columna+1)*3
+     0,2=(fila+1), (columna+1), numColum=6,->9(fila*numColumna)+(columna+1)*3
 ...
           1+ 1         1                      1*6*3=18+((0+1)*3)=21
-     1,0=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,0=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
            1+1          2                       1*6*3=18+((1+1)*3)=24
-     1,1=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,1=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             1+1        3                     1*6*3=18+((2+1)*3)=27
-     1,2=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     1,2=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             2         3
-     1,3=(fila+1), (col+1), numColum=6,->
+     1,3=(fila+1), (columna+1), numColum=6,->
 ...         3         1                    2*6*3=36+((0+1)*3)
-     2,0=(fila+1), (col+1), numColum=6,->(fila*numColumna)+(columna+1)*3
+     2,0=(fila+1), (columna+1), numColum=6,->(fila*numColumna)+(columna+1)*3
             3         2
-     2,1=(fila+1), (col+1), numColum=6,->
+     2,1=(fila+1), (columna+1), numColum=6,->
             3         3
-    2,2 =(fila+1), (col+1), numColum=6,->
+    2,2 =(fila+1), (columna+1), numColum=6,->
 
 *///               (1+1)*3=6+18=24
     int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));
@@ -504,21 +508,66 @@ void borrarFicha(unsigned char* tablero,int fila, int columna, int numColumnas){
 
 
 }
+void llenarHuecos(unsigned char* tablero, int numFilas, int numColumnas) {
+    for (int columna = 0; columna < numColumnas; ++columna) {
+        for (int fila = 0; fila < numFilas; ++fila) {
+            unsigned char fichaActual = FichaPorCoord(fila, columna, numColumnas, tablero);
+            if (fichaActual == 0b00000111) { // Si la celda actual está vacía
+                int idFicha = rand() % 6; // Genera un número aleatorio entre 0 y 5
+                InsertarFicha(idFicha, tablero, fila, columna, numColumnas);
+            }
+        }
+    }
+}
 void aplicarGraverdad(unsigned char* tablero, int numFilas, int numColumnas) {
-    for (int row = 0; row <  numFilas - 1;++row ) {
-        for (int  col = 0;  col<numColumnas; ++col) {
-            unsigned char fichaActual = FichaPorCoord(row, col, numColumnas, tablero);
-            if (fichaActual == 0b00000111) { // Si la ficha actual está vacía
-                for (int k = row - 1; k >= 0; --k) {
-                    unsigned char fichaArriba = ByteFicha(k, col, numColumnas, tablero);
+    for (int columna = 0; columna < numColumnas; ++columna) {
+        for (int fila = numFilas - 1; fila >= 0; --fila) {
+            unsigned char fichaActual = FichaPorCoord(fila, columna, numColumnas, tablero);
+            if (fichaActual == 0b00000111) { // Si la celda actual está vacía
+                for (int k = fila - 1; k >= 0; --k) {
+                    unsigned char fichaArriba = ByteFicha(k, columna, numColumnas, tablero);
                     if (fichaArriba != 0b00000111) { // Si hay una ficha arriba
-                        borrarFicha(tablero, k, col, numColumnas); // Borrar la ficha de arriba
-                        InsertarFicha(fichaArriba, tablero, row, col, numColumnas); // Mover la ficha hacia abajo
+                        borrarFicha(tablero, k, columna, numColumnas); // Borrar la ficha de arriba
+                        InsertarFicha(fichaArriba, tablero, fila, columna, numColumnas); // Mover la ficha hacia abajo
                         break;
                     }
                 }
             }
         }
     }
+llenarHuecos(tablero, numFilas, numColumnas); // Llenar los huecos con nuevas fichas
+}
+// Función para contar cuántas fichas adyacentes (arriba, abajo, izquierda, derecha) 
+// son iguales a la ficha ubicada en la celda dada (fila, columna).
+int eliminarCoincidencias(int fila, int columna, int numFilas, int numColumnas, unsigned char *&tablero) {
+unsigned char fichaCentral = FichaPorCoord(fila, columna, numColumnas, tablero);
+    if (fichaCentral == 0b00000111) {// Si la celda está vacía (ID 0b00000111), no se considera para repetir
+        return 0;
+    }
+   /* // Vectores de desplazamiento para las 4 direcciones: {Fila, Columna}
+    //           0              1                 2               3
+    // Arriba (-1, 0), Abajo (1, 0), Izquierda (0, -1), Derecha (0, 1)*/
+    int dFila[] = {-1, 1, 0, 0};
+    int dColumna[] = {0, 0, -1, 1};
+ unsigned char *bitReferencia = new unsigned char[((numFilas * numColumnas)+7)/8];
+    for (int i=0; i>((numFilas * numColumnas)+7)/8;++i) {
+    bitReferencia[i]=0b11111111;
+    }
+    for (int i = 0; i < 4; ++i) {
+        int nuevaFila = fila + dFila[i];
+        int nuevaColumna = columna + dColumna[i];
+        // Validar que la celda vecina esté dentro de los límites del tablero
+        if (nuevaFila >= 0 && nuevaFila < numFilas && nuevaColumna >= 0 && nuevaColumna < numColumnas) {
+            // Obtener la ficha de la celda vecina con tu función FichaPorCoord
+            unsigned char fichaVecina = FichaPorCoord(nuevaFila, nuevaColumna, numColumnas, tablero);
+            
+            // Comprobar si coincide con la ficha central
+            if (fichaVecina == fichaCentral) {
+                
+            }
+        }
+    }
+
+    return 0;
 }
 #endif // FUNCIONESSWEETCRUSH_H
