@@ -466,7 +466,7 @@ void imprimirTablero(int numFilas, int numColumnas, unsigned char *&tablero){
         if (bitFicha%(numColumnas*3)==0){
             cout<<endl;
             
-           if (contF-1!=numColumnas){
+           if (contF!=numFilas){
             cout<<contF<<" ";
            contF++;
            }
@@ -565,7 +565,7 @@ llenarHuecos(tablero, numFilas, numColumnas); // Llenar los huecos con nuevas fi
 }
 // Función para contar cuántas fichas adyacentes (arriba, abajo, izquierda, derecha) 
 // son iguales a la ficha ubicada en la celda dada (fila, columna).
-void eliminarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero) {
+void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero) {
     // Vectores de desplazamiento 
     
     int filtroUnoFilas[] =   {1,         0};//                       Abajo y Derecha
@@ -658,7 +658,45 @@ for (int i = 0; i < contador; i++)
     delete[] tempColumnas;
 //    delete[] tempFichas;
 }
-
+void eliminarFila(int fila, int &numFilas, int numColumnas, unsigned char *&tablero) {
+    unsigned char *nuevoTablero = new unsigned char[(numFilas - 1) * numColumnas];// Se reserva el tamaño exacto para un tablero con una fila menos
+    int filaDestino = 0; // Indice de control para las filas del nuevo tablero
+    for (int filas = 0; filas < numFilas; ++filas)
+    { 
+        if (filas != fila)// Solo copiamos las filas que NO sean la que queremos eliminar
+        { 
+            for (int columnas = 0; columnas < numColumnas; ++columnas)
+            {   
+                unsigned char fichaActual = FichaPorCoord(filas, columnas, numColumnas, tablero);// Obtenemos la ficha a copiar
+                InsertarFicha((int)fichaActual, nuevoTablero, filaDestino, columnas, numColumnas);// Insertamos en el nuevo tablero usando filaDestino
+            }
+            filaDestino++; // Avanzamos de fila solo en el nuevo tablero tras copiar una fila
+        }
+    }
+    delete[] tablero;// Liberamos la memoria del tablero original para evitar memory leaks
+    tablero = nuevoTablero;// Reasignamos el puntero por referencia para que ahora apunte al nuevo bloque de memoria
+    numFilas-=1;    //disminuimos las filas en 1
+}
+void eliminarColumna(int columna, int numFilas, int &numColumnas, unsigned char *&tablero) {
+    unsigned char *nuevoTablero = new unsigned char[numFilas * (numColumnas - 1)];
+    for (int filas = 0; filas < numFilas; ++filas)
+    { 
+        int columnaDestino = 0; // Índice de control para las columnas del nuevo tablero, se reinicia cada fila        
+        for (int columnas = 0; columnas < numColumnas; ++columnas)
+        {               
+            if (columnas != columna)// Solo copiamos las columnas que NO sean la que queremos eliminar
+            {                 
+                unsigned char fichaActual = FichaPorCoord(filas, columnas, numColumnas, tablero);// Obtenemos la ficha a copiar del tablero original                
+                InsertarFicha((int)fichaActual, nuevoTablero, filas, columnaDestino, numColumnas - 1);      
+                columnaDestino++; // Avanzamos de columna solo en el nuevo tablero tras copiar una ficha válida
+            }
+        }
+    }
+    delete[] tablero;
+    // Reasignamos el puntero por referencia para que apunte al nuevo bloque de memoria
+    tablero = nuevoTablero;
+    numColumnas-=1;
+}
 #include <iostream>
 
 using namespace std;
