@@ -2,6 +2,14 @@
 #define FUNCIONES_H
 #include <iostream>
 using namespace std;
+bool existeEnArreglos(int fila, int columna, int tamano, int *tempFilas, int *tempColumnas) {
+    for (int i = 0; i < tamano; i++) {
+        if (tempColumnas[i] == columna  && tempFilas[i]== fila ) {
+            return true; // El número está en el arreglo
+        }
+    }
+    return false; // El número no se encontró después de revisar todo el arreglo
+}
 void byteBinario(unsigned char a){
 for (int i=(sizeof(a)*8)-1;i>=0;i--){
     if ((a>>i)&1==1){
@@ -15,6 +23,10 @@ void apagarBit(int fila, int columna, int filas, int columnas, unsigned char *bi
 //int byte=(((fila*columnas)+columna))/8, bit=(((fila*columnas)+columna))%8;
 bitReferencia[(((fila*columnas)+columna))/8]=bitReferencia[(((fila*columnas)+columna))/8]& ~(1<<7-((((fila*columnas)+columna))%8));
 
+}
+void encenderBit(int fila, int columna, int filas, int columnas, unsigned char *bitReferencia) {
+//int byte=(((fila*columnas)+columna))/8, bit=(((fila*columnas)+columna))%8;
+bitReferencia[(((fila*columnas)+columna))/8]=bitReferencia[(((fila*columnas)+columna))/8]|(1<<7-((((fila*columnas)+columna))%8));
 }
 void imprimirByteArreglo(int fila, int columna, int numColumnas, unsigned char *&tablero){
             for(int i=0;i<((numColumnas*fila*3)+numColumnas)/8;i++){
@@ -430,21 +442,35 @@ void coordenadasSegunBit(int bitFicha, int *&fila, int *&columna, int numColumna
     }
 }
 void imprimirTablero(int numFilas, int numColumnas, unsigned char *&tablero){
+    int contF=1;
     int totalFichas = numFilas * numColumnas;
     int *fila(nullptr),*columna(nullptr);
     int *tableroPtr=nullptr;
     int bitFicha;
+    cout<<"  ";
+    for (int i = 0; i < numColumnas; i++)
+    {
+        cout<< " "<<i<<" ";
+    }
+    cout<<endl<<"0 ";
     // Justificación: Cada ficha salta exactamente 3 bits en el arreglo continuo.
     // Índices de bits: i=1 (bit 3), i=2 (bit 6), i=3 (bit 9)...
     for (int i = 3; i <= totalFichas*3;){
         bitFicha = i;
         coordenadasSegunBit(bitFicha,fila,columna,numColumnas);
       //  byteBinario(ByteFicha(*fila, *columna, numColumnas,tablero));
-        cout << ' ';
-        cout << fichaID(ByteFicha(*fila, *columna, numColumnas,tablero)) << ' ';
+       // cout <<'('<<contF<<','<<contC<<')'<< ' ';
+      //  contC++;
+        cout << "[" << fichaID(ByteFicha(*fila, *columna, numColumnas,tablero))<<']' ;
   //      imprimirTresBitsInferiores(ByteFicha(*fila, *columna, numColumnas,tablero));
         if (bitFicha%(numColumnas*3)==0){
             cout<<endl;
+            
+           if (contF-1!=numColumnas){
+            cout<<contF<<" ";
+           contF++;
+           }
+        //    contC=0;
         }
         i+=3;
     }
@@ -539,35 +565,131 @@ llenarHuecos(tablero, numFilas, numColumnas); // Llenar los huecos con nuevas fi
 }
 // Función para contar cuántas fichas adyacentes (arriba, abajo, izquierda, derecha) 
 // son iguales a la ficha ubicada en la celda dada (fila, columna).
-int eliminarCoincidencias(int fila, int columna, int numFilas, int numColumnas, unsigned char *&tablero) {
-unsigned char fichaCentral = FichaPorCoord(fila, columna, numColumnas, tablero);
-    if (fichaCentral == 0b00000111) {// Si la celda está vacía (ID 0b00000111), no se considera para repetir
-        return 0;
-    }
-   /* // Vectores de desplazamiento para las 4 direcciones: {Fila, Columna}
-    //           0              1                 2               3
-    // Arriba (-1, 0), Abajo (1, 0), Izquierda (0, -1), Derecha (0, 1)*/
-    int dFila[] = {-1, 1, 0, 0};
-    int dColumna[] = {0, 0, -1, 1};
- unsigned char *bitReferencia = new unsigned char[((numFilas * numColumnas)+7)/8];
-    for (int i=0; i>((numFilas * numColumnas)+7)/8;++i) {
-    bitReferencia[i]=0b11111111;
-    }
-    for (int i = 0; i < 4; ++i) {
-        int nuevaFila = fila + dFila[i];
-        int nuevaColumna = columna + dColumna[i];
-        // Validar que la celda vecina esté dentro de los límites del tablero
-        if (nuevaFila >= 0 && nuevaFila < numFilas && nuevaColumna >= 0 && nuevaColumna < numColumnas) {
-            // Obtener la ficha de la celda vecina con tu función FichaPorCoord
-            unsigned char fichaVecina = FichaPorCoord(nuevaFila, nuevaColumna, numColumnas, tablero);
-            
-            // Comprobar si coincide con la ficha central
-            if (fichaVecina == fichaCentral) {
-                
+void eliminarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero) {
+    // Vectores de desplazamiento 
+    
+    int filtroUnoFilas[] =   {1,         0};//                       Abajo y Derecha
+    int filtroUnoColumnas[] ={0,         1};
+    //                      Izq. Abaj. Der.
+    int filtroDosFilas[]=    {0 ,  1,   0};
+    int filtroDosColumnas[]={-1,   0,   1};
+    int  *tempColumnas=nullptr, *tempFilas=nullptr;//   unsigned char *tempFichas=nullptr;
+    tempFilas=new int[numColumnas*numFilas];
+    tempColumnas=new int[numColumnas*numFilas];//  tempFichas=new unsigned char[numColumnas*numFilas];
+    int contador=0;//para borrar 
+    for (int fila = 0; fila < numFilas; ++fila)
+    {
+        for (int columna = 0; columna < numColumnas; ++columna)
+        {   
+            bool derecha=false,abajo=false;
+            unsigned char ficha = FichaPorCoord(fila, columna, numColumnas, tablero);
+            for (int  filtro1 = 0; filtro1 < 2; ++filtro1)
+            {
+                int nuevaFila = fila + filtroUnoFilas[filtro1];
+                int nuevaColumna = columna + filtroUnoColumnas[filtro1];
+                 
+                if (nuevaFila >= 0 && nuevaFila < numFilas && nuevaColumna >= 0 && nuevaColumna < numColumnas) {// Validar que la celda vecina esté dentro de los límites del tablero
+                    unsigned char fichaVecina = FichaPorCoord(nuevaFila, nuevaColumna, numColumnas, tablero);
+                    if (fichaVecina == ficha){
+                        for (int filtro2 = 0; filtro2 < 3; ++filtro2)
+                        {   if (filtro1==0)
+                            {
+                            abajo=true;
+
+                            }
+                        
+                            if (filtro1==1)
+                            {
+                                if (!derecha)
+                                {
+                                    filtro2+=1;
+                                    derecha=true;
+                                }
+                            }
+                            int filaTemp= nuevaFila + filtroDosFilas[filtro2];
+                            int columnaTemp= nuevaColumna + filtroDosColumnas[filtro2];
+                            
+                            
+                            if (filaTemp >= 0 && filaTemp < numFilas && columnaTemp>= 0 && columnaTemp < numColumnas) 
+                            {// Validar que la celda vecina esté dentro de los límites del tablero 
+                                
+                                unsigned char fichaVecinaTemp = FichaPorCoord(filaTemp, columnaTemp, numColumnas, tablero);// Obtener la ficha de la celda vecina con tu función FichaPorCoord
+                                
+                                if (fichaVecinaTemp == ficha || derecha&abajo==true)
+                                {
+                                    if (!existeEnArreglos(fila,columna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    {
+                                        tempColumnas[contador]=columna;
+                                     //   tempFichas[contador]=ficha;
+                                        tempFilas[contador]=fila;
+                                        contador++;
+                                    }    
+                                    if (!existeEnArreglos(nuevaFila,nuevaColumna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    {
+                                        tempColumnas[contador]=nuevaColumna;
+                                        tempFilas[contador]=nuevaFila;
+                                    //    tempFichas[contador]=fichaVecina;
+                                        contador++;
+                                    }    
+                                    if (!existeEnArreglos(filaTemp,columnaTemp, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    {   if(derecha&abajo==true){columnaTemp--;}
+                                        tempColumnas[contador]=columnaTemp;
+                                        tempFilas[contador]=filaTemp;
+                                      //  tempFichas[contador]=fichaVecinaTemp;
+                                        contador++;
+                                    }   
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    return 0;
+// Aplicar las eliminaciones en el tablero original
+for (int i = 0; i < contador; i++)
+{
+    borrarFicha(tablero,tempFilas[i],tempColumnas[i],numColumnas);
+}
+
+    // Liberar la memoria dinámica asignada
+    delete[] tempFilas;
+    delete[] tempColumnas;
+//    delete[] tempFichas;
+}
+
+#include <iostream>
+
+using namespace std;
+
+void imprimirTableroConRecuadros(int numFilas, int numColumnas, unsigned char *tablero) {
+    // Recorremos cada fila ("hasta que le diga que abajo")
+    for (int fila = 0; fila < numFilas; ++fila) {
+        
+        // CAPA 1: Imprimir los bordes superiores (techos) de toda la fila
+        for (int col = 0; col < numColumnas; ++col) {
+            cout << "----"; 
+        }
+        cout << "-\n"; // Cierra la esquina derecha y baja de línea
+
+        // CAPA 2: Imprimir los bordes laterales y las fichas en el medio
+        for (int col = 0; col < numColumnas; ++col) {
+            // Se calcula la posición en el arreglo 1D que simula 2D
+            
+            // Imprime la pared izquierda y la ficha centrada
+            cout << "| " ; 
+             ImprimirFicha(fila,col,numColumnas,tablero) ;
+             cout<< " ";
+        }
+        cout << "|\n"; // Cierra la pared del último recuadro de la fila y baja de línea
+    }
+
+    // CAPA 3: Imprimir el piso final del tablero
+    // Solo se hace una vez al final para cerrar los recuadros de la última fila
+    for (int col = 0; col < numColumnas; ++col) {
+        cout << "----";
+    }
+    cout << "-\n";
 }
 #endif // FUNCIONESSWEETCRUSH_H
