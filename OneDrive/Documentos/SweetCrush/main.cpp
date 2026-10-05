@@ -121,7 +121,7 @@ int main() {
                     }
             cout << "Ingrese la colunma: ";
             cin >> tempColumna;
-            while (tempColumna<0 || tempColumna>numColumnas || cin.fail());{
+            while (tempColumna<0 || tempColumna>numColumnas || cin.fail()){
                 if (cin.fail()){
                     cin.clear();
                     cout << "Error: Debes ingresar un numero." << endl;
