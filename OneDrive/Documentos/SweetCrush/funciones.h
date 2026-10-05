@@ -662,7 +662,7 @@ void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero
                                         contador++;
                                     }    
                                     if (!existeEnArreglos(filaTemp,columnaTemp, numColumnas*numFilas,tempFilas,tempColumnas))
-                                    {   if(derecha&abajo==true){columnaTemp--;}
+                                    {   if((derecha&abajo)==true){columnaTemp--;}
                                         tempColumnas[contador]=columnaTemp;
                                         tempFilas[contador]=filaTemp;
                                       //  tempFichas[contador]=fichaVecinaTemp;

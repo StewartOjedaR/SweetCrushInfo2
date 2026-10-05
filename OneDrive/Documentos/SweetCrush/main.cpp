@@ -71,8 +71,9 @@ int main() {
       cout<<"PUNTAJE: "<<puntaje<<endl;
       esperarSegundos(2);
     }
-    esperarSegundos(3);
+    
     do {
+      esperarSegundos(3);
       cout << "Acciones: 1: Eliminar Ficha"
            << endl << "          2: Borrar Fila"
            << endl << "          3: Borrar Columna"
