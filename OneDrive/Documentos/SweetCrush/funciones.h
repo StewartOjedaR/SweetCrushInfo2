@@ -19,34 +19,37 @@ void limpiarConsola() {
     system("clear"); // Comando para Linux / macOS
 #endif
 }
-bool existeEnArreglos(int fila, int columna, int tamano, int *tempFilas, int *tempColumnas) {
-    for (int i = 0; i < tamano; i++) {
-        if (tempColumnas[i] == columna  && tempFilas[i]== fila ) {
-            return true; // El número está en el arreglo
+bool existeEnArreglos(int fila, int columna, int contador, int *tempFilas, int *tempColumnas) {
+    for (int i = 0; i <= contador; i++) {
+        if (tempColumnas[i]==columna) {
+            if(tempFilas[i]== fila){
+                return true; // El número está en el arreglo
+            }
+
         }
     }
     return false; // El número no se encontró después de revisar todo el arreglo
 }
 void byteBinario(unsigned char a){
-for (int i=(sizeof(a)*8)-1;i>=0;i--){
-    if ((a>>i)&1==1){
-       cout<<'1';
-    }else{ 
-      cout<<'0';
-    } if (i%4==0){cout<<' ';
-}}
+    for (int i=(sizeof(a)*8)-1;i>=0;i--){
+        if (((a>>i)&1)==1){
+            cout<<'1';
+        }else{
+            cout<<'0';
+        } if (i%4==0){cout<<' ';
+        }}
 }
 void apagarBit(int fila, int columna, int numFilas, int numColumnas, unsigned char *bitReferencia) {
-//int byte=(((fila*columna)+columna))/8, bit=(((fila*columna)+columna))%8;
-bitReferencia[(((fila*numColumnas)+columna))/8]=bitReferencia[(((fila*numColumnas)+columna))/8]& ~(1<<7-((((fila*numColumnas)+columna))%8));
+    //int byte=(((fila*columna)+columna))/8, bit=(((fila*columna)+columna))%8;
+    bitReferencia[(((fila*numColumnas)+columna))/8]=bitReferencia[(((fila*numColumnas)+columna))/8]& ~(1<<7-((((fila*numColumnas)+columna))%8));
 
 }
 void encenderBit(int fila, int columna, int numFilas, int numColumnas, unsigned char *bitReferencia) {
-//int byte=(((fila*columna)+columna))/8, bit=(((fila*columna)+columna))%8;
-bitReferencia[(((fila*numColumnas)+columna))/8]=bitReferencia[(((fila*numColumnas)+columna))/8]|(1<<7-((((fila*numColumnas)+columna))%8));
+    //int byte=(((fila*columna)+columna))/8, bit=(((fila*columna)+columna))%8;
+    bitReferencia[(((fila*numColumnas)+columna))/8]=bitReferencia[(((fila*numColumnas)+columna))/8]|(1<<7-((((fila*numColumnas)+columna))%8));
 }
 void imprimirByteArreglo(int fila, int columna, int numColumnas, unsigned char *&tablero){
-            for(int i=0;i<((numColumnas*fila*3)+numColumnas)/8;i++){
+    for(int i=0;i<((numColumnas*fila*3)+numColumnas)/8;i++){
         byteBinario(tablero[i]);
         cout<<"byte["<<i<<"]"<<endl;
 
@@ -176,7 +179,7 @@ void mascaraIdFicha(int idFicha, int bitPosicion, unsigned char *&masc_1, unsign
 
             masc_1 = new unsigned char(ficha);//00000xxx
             masc_2=nullptr;
-         // imprimirTresBitsInferiores(*masc_1);
+            // imprimirTresBitsInferiores(*masc_1);
             break;
         default:
             break;
@@ -189,34 +192,44 @@ void InsertarFicha(int idFicha, unsigned char* tablero,int fila, int columna, in
     int *byte_1=nullptr, *byte_2=nullptr;//x_1=x-1
     int bitPosicion;
     unsigned char *masc_1=nullptr,*masc_2=nullptr, *mascTemp_1=nullptr,*mascTemp_2=nullptr;
-    bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
-                 //cuantos bits por columna + 
+    bitPosicion=(fila * numColumnas + columna+1) * 3;//
+    //cuantos bits por columna +
     mascaraIdFicha(idFicha,bitPosicion,masc_1,masc_2);//
     mascaraIdFicha(0b111,bitPosicion,mascTemp_1,mascTemp_2);//mascTemp_1 devuelve una ficha a aplicar ,mascTemp_2
 
     indicesBytes(bitPosicion,byte_1,byte_2);
     if (byte_2 != nullptr) {//
-        tablero[*byte_1]&=(~*mascTemp_1);//
-        tablero[*byte_2]&=(~*mascTemp_2);
-        tablero[*byte_1]^=*masc_1;
-        tablero[*byte_2]^=*masc_2;
-        delete byte_1, byte_2, masc_1, masc_2, mascTemp_1, mascTemp_2;
- 
+        tablero[*byte_1]&=(~(*mascTemp_1));//
+        tablero[*byte_2]&=(~(*mascTemp_2));
+        tablero[*byte_1]|=*masc_1;
+        tablero[*byte_2]|=*masc_2;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+        delete mascTemp_1;
+        delete mascTemp_2;
+
     } else {
-        tablero[*byte_1]&=(~*mascTemp_1);
-        tablero[*byte_1]^=*masc_1;
-    //    byteBinario((tablero[*byte_1]));
-//cout<<"byte_1: "<<*byte_1<<endl;
-//imprimirTresBitsInferiores(tablero[*byte_1]);
-//cout <<tablero[*byte_1]<<endl;
-        delete byte_1, byte_2, masc_1, masc_2, mascTemp_1, mascTemp_2;
+        tablero[*byte_1]&=(~(*mascTemp_1));
+        tablero[*byte_1]|=*masc_1;
+        //    byteBinario((tablero[*byte_1]));
+        //cout<<"byte_1: "<<*byte_1<<endl;
+        //imprimirTresBitsInferiores(tablero[*byte_1]);
+        //cout <<tablero[*byte_1]<<endl;
+        delete byte_1;
+        delete byte_2;
+        delete masc_1;
+        delete masc_2;
+        delete mascTemp_1;
+        delete mascTemp_2;
     }
 
 
 }
 void crearTablero(int numFilas, int numColumnas, unsigned char *&tablero) {
     int totalBits = numFilas * numColumnas * 3;
-    int numBytes = (totalBits + 7) / 8;
+    int numBytes = ((totalBits + 7) / 8)+1;
     tablero = new unsigned char[numBytes];
 
     for (int i = 0; i < numBytes; ++i) {
@@ -228,7 +241,7 @@ void rellenarTablero(int fila, int columna, unsigned char *&tablero) {
         for (int j = 0; j < columna; ++j) {
             int idFicha = rand() % 6; // Genera un número aleatorio entre 0 y 5
             InsertarFicha(idFicha, tablero, i, j, columna);
-            
+
         }
     }
 }
@@ -262,20 +275,21 @@ unsigned char ByteFicha(int fila, int columna,int numColumnas, unsigned char *& 
     2,2 =(fila+1), (columna+1), numColum=6,->
 
 *///               (1+1)*3=6+18=24
-    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));//
-    bitFicha=bitFicha-3;
+    int bitFicha=(fila * numColumnas + (columna+1)) * 3;
     unsigned char letra = '\0';
     unsigned char temp = 0;
 
-    switch (((bitFicha+3) % 8)) {
-    
+    switch (((bitFicha) % 8)) {
+
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
         letra = letra ^ temp;//0000000x ^ 00000xx0=00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 2: // 0.25 (bitFicha 10, 18, etc. donde 10%8 = 2) -> cruza byte [x] y x+1
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] << 2;
         temp = tablero[((bitFicha/8)+1)] >> 6;
         letra = letra ^ temp;//000000xx ^ 00000x00=00000xxx
@@ -283,26 +297,32 @@ unsigned char ByteFicha(int fila, int columna,int numColumnas, unsigned char *& 
         return letra;
     case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
         //                                xxx00000
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 5;//00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 4: // 0.5 (bitFicha 12, 20...) -> cruza o empieza en offset 4
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 5: // 0.625 (bitFicha 5, 13, 21...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 3;
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 6: // 0.75 (bitFicha 6, 14, 22...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 2;//0000 0000
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 7: // 0.875 (bitFicha 7, 15, 23...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 1;
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8];//00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
@@ -338,22 +358,24 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     2,2 =(fila+1), (columna+1), numColum=6,->
 
 *///               (1+1)*3=6+18=24
-    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));
-    bitFicha=bitFicha-3;
+    int bitFicha=(fila * numColumnas + columna+1) * 3;
+
     unsigned char letra = '\0';
     unsigned char temp = 0;
 
-    switch ((bitFicha+3) % 8) {                                         //[0000 00xx] [x000 000]
+    switch ((bitFicha) % 8) {        //[0000 00xx] [x000 000]
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
         letra = letra ^ temp;//00000xx0 ^ 0000000x=00000xxx
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
-        //                                                   
+        //
         //                                                [0000 000x]      [xx000000]
     case 2: // 0.25 (bitFicha 18, etc. donde 18%8 = 2) -> cruza byte [x] y [x+1]
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] << 2;//00000x->00000x00
         temp = tablero[((bitFicha/8)+1)] >> 6;//xx000000->000000xx
         letra = letra ^ temp;//00000x00 ^ 000000xx=00000xxx
@@ -362,31 +384,37 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
         break;
     case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
         //                                xxx00000
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 5;//00000xxx
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
-    case 4: // 0.5 (bitFicha 12, 20...) -> 
+    case 4: // 0.5 (bitFicha 12, 20...) ->
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 5: // 0.625 (bitFicha 5, 13, 21...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 3;
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 6: // 0.75 (bitFicha 6, 14, 22...)
-        letra = tablero[bitFicha/8] >> 2;//0000 0000
+        bitFicha=bitFicha-3;
+        letra = tablero[bitFicha/8] >> 2;//000x xx00
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 7: // 0.875 (bitFicha 7, 15, 23...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 1;
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
         break;
     case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8];//00000xxx
         letra=letra & 0b00000111;//00000xxx
         cout << fichaID(letra);
@@ -397,17 +425,18 @@ void ImprimirFicha(int fila, int columna,int numColumnas, unsigned char *& table
     }
 }
 unsigned char FichaPorCoord (int fila, int columna,int numColumnas, unsigned char *& tablero) {
-    int bitFicha=((columna+1)*3)+(fila*(numColumnas*3));
-    bitFicha=bitFicha-3;
+    int bitFicha=(fila * numColumnas + (columna+1)) * 3;
     unsigned char letra, temp;
-    switch ((bitFicha+3) % 8) {                                         //[0000 00xx] [x000 000]
+    switch ((bitFicha) % 8) {                                         //[0000 00xx] [x000 000]
     case 1: // 0.125 (bitFicha 9, 17, etc. donde 9%8 = 1) -> cruza byte [x] y [x+1]
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] <<1 ;// 0000 00xx->0000 0xx0
         temp = tablero[((bitFicha/8)+1)] >> 7;//x000 0000->0000 000x
         letra = letra ^ temp;//00000xx0 ^ 0000000x=00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;//                                           [0000 000x]      [xx000000]
     case 2: // 0.25 (bitFicha 18, etc. donde 18%8 = 2) -> cruza byte [x] y [x+1]
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] << 2;//00000x->00000x00
         temp = tablero[((bitFicha/8)+1)] >> 6;//xx000000->000000xx
         letra = letra ^ temp;//00000x00 ^ 000000xx=00000xxx
@@ -415,26 +444,32 @@ unsigned char FichaPorCoord (int fila, int columna,int numColumnas, unsigned cha
         return letra;
     case 3: // 0.375 (bitFicha 3, 11, 19...) -> 3 bits completos en el byte
         //                                xxx00000
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 5;//00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
-    case 4: // 0.5 (bitFicha 12, 20...) -> 
+    case 4: // 0.5 (bitFicha 12, 20...) ->
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 4;//0xxx0000>>4->00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 5: // 0.625 (bitFicha 5, 13, 21...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 3;
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 6: // 0.75 (bitFicha 6, 14, 22...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 2;//0000 0000
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 7: // 0.875 (bitFicha 7, 15, 23...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8] >> 1;
         letra=letra & 0b00000111;//00000xxx
         return letra;
     case 0: // 1.0 / 0.0 (bitFicha 0, 8, 16, 24...)
+        bitFicha=bitFicha-3;
         letra = tablero[bitFicha/8];//00000xxx
         letra=letra & 0b00000111;//00000xxx
         return letra;
@@ -483,24 +518,24 @@ void imprimirTablero(int numFilas, int numColumnas, unsigned char *&tablero){
     for (int i = 3; i <= totalFichas*3;i+=3){
         bitFicha = i;
         coordenadasSegunBit(bitFicha,fila,columna,numColumnas);
-      //  byteBinario(ByteFicha(*fila, *columna, numColumnas,tablero));
-       // cout <<'('<<contF<<','<<contC<<')'<< ' ';
-      //  contC++;
+        //  byteBinario(ByteFicha(*fila, *columna, numColumnas,tablero));
+        // cout <<'('<<contF<<','<<contC<<')'<< ' ';
+        //  contC++;
         cout << "[" << fichaID(ByteFicha(*fila, *columna, numColumnas,tablero))<<']' ;
-  //      imprimirTresBitsInferiores(ByteFicha(*fila, *columna, numColumnas,tablero));
+        //      imprimirTresBitsInferiores(ByteFicha(*fila, *columna, numColumnas,tablero));
         if (bitFicha%(numColumnas*3)==0){
             cout<<endl;
             if (contF!=numFilas){
                 if (contF>=10)
                 {
-                    cout<<contF<<" ";            
+                    cout<<contF<<" ";
                     contF++;
                 }else{
-                cout<<contF<<"  ";
-                contF++;            
-                } 
+                    cout<<contF<<"  ";
+                    contF++;
+                }
             }
-        //    contC=0;
+            //    contC=0;
         }
         //i+=3;
     }
@@ -532,8 +567,8 @@ void borrarFicha(unsigned char* tablero,int fila, int columna, int numColumnas){
     int *byte_1=nullptr, *byte_2=nullptr;//x_1=x-1
     int bitPosicion;
     unsigned char *masc_1=nullptr,*masc_2=nullptr;
-    bitPosicion=(((columna+1)*3)+(fila*(numColumnas*3)));//
-                 //cuantos bits por columna + 
+    bitPosicion=(fila * numColumnas + (columna+1)) * 3;;//
+
     mascaraIdFicha(0b111,bitPosicion,masc_1,masc_2);//
 
     indicesBytes(bitPosicion,byte_1,byte_2);
@@ -553,9 +588,9 @@ void borrarFicha(unsigned char* tablero,int fila, int columna, int numColumnas){
         temp=(~*masc_1);
         tablero[*byte_1]&=temp;
         tablero[*byte_1]^=*masc_1;
-//cout<<"byte_1: "<<*byte_1<<endl;
-//imprimirTresBitsInferiores(tablero[*byte_1]);
-//cout <<tablero[*byte_1]<<endl;
+        //cout<<"byte_1: "<<*byte_1<<endl;
+        //imprimirTresBitsInferiores(tablero[*byte_1]);
+        //cout <<tablero[*byte_1]<<endl;
         delete byte_1;
         delete byte_2;
         delete masc_1;
@@ -591,43 +626,43 @@ void aplicarGravedad(unsigned char* tablero, int numFilas, int numColumnas) {
             }
         }
     }
-llenarHuecos(tablero, numFilas, numColumnas); // Llenar los huecos con nuevas fichas
+    //llenarHuecos(tablero, numFilas, numColumnas); // Llenar los huecos con nuevas fichas
 }
-// Función para contar cuántas fichas adyacentes (arriba, abajo, izquierda, derecha) 
+// Función para contar cuántas fichas adyacentes (arriba, abajo, izquierda, derecha)
 // son iguales a la ficha ubicada en la celda dada (fila, columna).
 void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero) {
-    // Vectores de desplazamiento 
-    
+    // Vectores de desplazamiento
+    unsigned char fichaIzq;
     int filtroUnoFilas[] =   {1,         0};//                       Abajo y Derecha
     int filtroUnoColumnas[] ={0,         1};
     //                      Izq. Abaj. Der.
     int filtroDosFilas[]=    {0 ,  1,   0};
     int filtroDosColumnas[]={-1,   0,   1};
     int  *tempColumnas=nullptr, *tempFilas=nullptr;//   unsigned char *tempFichas=nullptr;
-    tempFilas=new int[numColumnas*numFilas];
-    tempColumnas=new int[numColumnas*numFilas];//  tempFichas=new unsigned char[numColumnas*numFilas];
-    int contador=0;//para borrar 
+    tempFilas = new int[numFilas * numColumnas];
+    tempColumnas = new int[numFilas * numColumnas];//  tempFichas=new unsigned char[numColumnas*numFilas];
+    int contador=0;//para borrar
     for (int fila = 0; fila < numFilas; ++fila)
     {
         for (int columna = 0; columna < numColumnas; ++columna)
-        {   
+        {
             bool derecha=false,abajo=false;
             unsigned char ficha = FichaPorCoord(fila, columna, numColumnas, tablero);
             for (int  filtro1 = 0; filtro1 < 2; ++filtro1)
             {
                 int nuevaFila = fila + filtroUnoFilas[filtro1];
                 int nuevaColumna = columna + filtroUnoColumnas[filtro1];
-                 
+
                 if (nuevaFila >= 0 && nuevaFila < numFilas && nuevaColumna >= 0 && nuevaColumna < numColumnas) {// Validar que la celda vecina esté dentro de los límites del tablero
                     unsigned char fichaVecina = FichaPorCoord(nuevaFila, nuevaColumna, numColumnas, tablero);
                     if (fichaVecina == ficha){
                         for (int filtro2 = 0; filtro2 < 3; ++filtro2)
                         {   if (filtro1==0)
                             {
-                            abajo=true;
+                                abajo=true;
 
                             }
-                        
+
                             if (filtro1==1)
                             {
                                 if (!derecha)
@@ -638,36 +673,41 @@ void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero
                             }
                             int filaTemp= nuevaFila + filtroDosFilas[filtro2];
                             int columnaTemp= nuevaColumna + filtroDosColumnas[filtro2];
-                            
-                            
-                            if (filaTemp >= 0 && filaTemp < numFilas && columnaTemp>= 0 && columnaTemp < numColumnas) 
-                            {// Validar que la celda vecina esté dentro de los límites del tablero 
-                                
+
+
+                            if (filaTemp >= 0 && filaTemp < numFilas && columnaTemp>= 0 && columnaTemp < numColumnas)
+                            {// Validar que la celda vecina esté dentro de los límites del tablero
+
                                 unsigned char fichaVecinaTemp = FichaPorCoord(filaTemp, columnaTemp, numColumnas, tablero);// Obtener la ficha de la celda vecina con tu función FichaPorCoord
-                                
-                                if (fichaVecinaTemp == ficha || (derecha&abajo)==true)
-                                {
-                                    if (!existeEnArreglos(fila,columna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                unsigned char fichaIzq_Abajo = FichaPorCoord(fila+1, columna-1, numColumnas, tablero);
+
+                                if (fichaVecinaTemp == ficha ||(abajo&derecha)==true){
+                                    if (!existeEnArreglos(fila,columna,contador,tempFilas,tempColumnas))
                                     {
+                                        if (fichaIzq_Abajo!=ficha){
+                                            if (derecha==false && abajo==true ){continue;}
+                                            if (derecha==true && abajo==false){continue;}
+                                        }
                                         tempColumnas[contador]=columna;
-                                     //   tempFichas[contador]=ficha;
+                                        //   tempFichas[contador]=ficha;
                                         tempFilas[contador]=fila;
                                         contador++;
-                                    }    
-                                    if (!existeEnArreglos(nuevaFila,nuevaColumna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    }
+                                    if (!existeEnArreglos(nuevaFila,nuevaColumna,contador,tempFilas, tempColumnas ))
                                     {
                                         tempColumnas[contador]=nuevaColumna;
                                         tempFilas[contador]=nuevaFila;
-                                    //    tempFichas[contador]=fichaVecina;
+                                        //    tempFichas[contador]=fichaVecina;
                                         contador++;
-                                    }    
-                                    if (!existeEnArreglos(filaTemp,columnaTemp, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    }
+                                    if (!existeEnArreglos(filaTemp,columnaTemp,contador,tempFilas,tempColumnas))
                                     {   if((derecha&abajo)==true){columnaTemp--;}
+
                                         tempColumnas[contador]=columnaTemp;
                                         tempFilas[contador]=filaTemp;
-                                      //  tempFichas[contador]=fichaVecinaTemp;
+                                        //  tempFichas[contador]=fichaVecinaTemp;
                                         contador++;
-                                    }   
+                                    }
                                 }
                             }
                         }
@@ -677,26 +717,34 @@ void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero
         }
     }
 
-// Aplicar las eliminaciones en el tablero original
-for (int i = 0; i < contador; i++)
-{
-    borrarFicha(tablero,tempFilas[i],tempColumnas[i],numColumnas);
-}
-
+    // Aplicar las eliminaciones en el tablero original
+    for (int i = 0; i < contador; i++)
+    {
+        borrarFicha(tablero,tempFilas[i],tempColumnas[i],numColumnas);
+    }
+//    system("clear");
+    imprimirTablero(numFilas,numColumnas,tablero);
+    //esperarSegundos(2);
+    char x;
+    cout << "Ingrese cualquier tecla para continuar: ";
+    cin >> x;
+    aplicarGravedad(tablero,numFilas,numColumnas);
+    imprimirTablero(numFilas,numColumnas,tablero);
+    llenarHuecos(tablero, numFilas, numColumnas);
     // Liberar la memoria dinámica asignada
     delete[] tempFilas;
     delete[] tempColumnas;
-//    delete[] tempFichas;
+    //    delete[] tempFichas;
 }
 void eliminarFila(int filaAEliminar, int &numFilas, int numColumnas, unsigned char *&tablero) {
     unsigned char *nuevoTablero = new unsigned char[(numFilas - 1) * numColumnas];// Se reserva el tamaño exacto para un tablero con una fila menos
     int filaDestino = 0; // Indice de control para las fila del nuevo tablero
     for (int fila = 0; fila < numFilas; ++fila)
-    { 
+    {
         if (fila != filaAEliminar)// Solo copiamos las fila que NO sean la que queremos eliminar
-        { 
+        {
             for (int columna = 0; columna < numColumnas; ++columna)
-            {   
+            {
                 unsigned char fichaActual = FichaPorCoord(fila, columna, numColumnas, tablero);// Obtenemos la ficha a copiar
                 InsertarFicha((int)fichaActual, nuevoTablero, filaDestino, columna, numColumnas);// Insertamos en el nuevo tablero usando filaDestino
             }
@@ -710,14 +758,14 @@ void eliminarFila(int filaAEliminar, int &numFilas, int numColumnas, unsigned ch
 void eliminarColumna(int columnaAEliminar, int numFilas, int &numColumnas, unsigned char *&tablero) {
     unsigned char *nuevoTablero = new unsigned char[numFilas * (numColumnas - 1)];
     for (int fila = 0; fila < numFilas; ++fila)
-    { 
-        int columnaDestino = 0; // Índice de control para las columna del nuevo tablero, se reinicia cada fila        
+    {
+        int columnaDestino = 0; // Índice de control para las columna del nuevo tablero, se reinicia cada fila
         for (int columna = 0; columna < numColumnas; ++columna)
-        {               
+        {
             if (columna != columnaAEliminar)// Solo copiamos las columna que NO sean la que queremos eliminar
-            {                 
-                unsigned char fichaActual = FichaPorCoord(fila, columna, numColumnas, tablero);// Obtenemos la ficha a copiar del tablero original                
-                InsertarFicha((int)fichaActual, nuevoTablero, fila, columnaDestino, numColumnas - 1);      
+            {
+                unsigned char fichaActual = FichaPorCoord(fila, columna, numColumnas, tablero);// Obtenemos la ficha a copiar del tablero original
+                InsertarFicha((int)fichaActual, nuevoTablero, fila, columnaDestino, numColumnas - 1);
                 columnaDestino++; // Avanzamos de columna solo en el nuevo tablero tras copiar una ficha válida
             }
         }
@@ -730,21 +778,21 @@ void eliminarColumna(int columnaAEliminar, int numFilas, int &numColumnas, unsig
 void imprimirTableroConRecuadros(int numFilas, int numColumnas, unsigned char *tablero) {
     // Recorremos cada fila ("hasta que le diga que abajo")
     for (int fila = 0; fila < numFilas; ++fila) {
-        
+
         // CAPA 1: Imprimir los bordes superiores (techos) de toda la fila
         for (int col = 0; col < numColumnas; ++col) {
-            cout << "----"; 
+            cout << "----";
         }
         cout << "-\n"; // Cierra la esquina derecha y baja de línea
 
         // CAPA 2: Imprimir los bordes laterales y las fichas en el medio
         for (int col = 0; col < numColumnas; ++col) {
             // Se calcula la posición en el arreglo 1D que simula 2D
-            
+
             // Imprime la pared izquierda y la ficha centrada
-            cout << "| " ; 
-             ImprimirFicha(fila,col,numColumnas,tablero) ;
-             cout<< " ";
+            cout << "| " ;
+            ImprimirFicha(fila,col,numColumnas,tablero) ;
+            cout<< " ";
         }
         cout << "|\n"; // Cierra la pared del último recuadro de la fila y baja de línea
     }
@@ -763,9 +811,9 @@ void agregarFila(int filaDondeInsertar, int &numFilas, int numColumnas, unsigned
 
     for (int fila = 0; fila <= numFilas; ++fila) {    // Iteramos hasta numFilas inclusive (es decir, una iteración extra porque agregaremos una fila)
         for (int columna = 0; columna < numColumnas; ++columna) {
-            
+
             if (fila == filaDondeInsertar) {
-               
+
                 unsigned char fichaAleatoria = rand() % 6; // Generar ficha aleatoria
                 InsertarFicha((int)fichaAleatoria, nuevoTablero, fila, columna, numColumnas);
             } else {
@@ -786,12 +834,12 @@ void agregarFila(int filaDondeInsertar, int &numFilas, int numColumnas, unsigned
 }
 void agregarColumna(int columnaDondeInsertar, int numFilas, int &numColumnas, unsigned char *&tablero) {
     unsigned char *nuevoTablero = new unsigned char[numFilas * (numColumnas + 1)];
-    
+
     for (int fila = 0; fila < numFilas; ++fila) {
         int columnaOrigen = 0; // Se reinicia por cada fila
-        
+
         for (int columna = 0; columna <= numColumnas; ++columna) {
-            
+
             if (columna == columnaDondeInsertar) {
                 // Generar ficha aleatoria de '0' a '5'
                 unsigned char fichaAleatoria = rand() % 6;
@@ -811,38 +859,38 @@ void agregarColumna(int columnaDondeInsertar, int numFilas, int &numColumnas, un
     numColumnas+=1;
 }
 bool hayCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero,int &puntaje) {
-    // Vectores de desplazamiento 
-    
+    // Vectores de desplazamiento
+
     int filtroUnoFilas[] =   {1,         0};//                       Abajo y Derecha
     int filtroUnoColumnas[] ={0,         1};
     //                      Izq. Abaj. Der.
     int filtroDosFilas[]=    {0 ,  1,   0};
     int filtroDosColumnas[]={-1,   0,   1};
     int  *tempColumnas=nullptr, *tempFilas=nullptr;//   unsigned char *tempFichas=nullptr;
-    tempFilas=new int[numColumnas*numFilas];
-    tempColumnas=new int[numColumnas*numFilas];//  tempFichas=new unsigned char[numColumnas*numFilas];
-    int contador=0;//para borrar 
+    tempFilas = new int[numFilas * numColumnas];
+    tempColumnas = new int[numFilas * numColumnas]; //tempFichas=new unsigned char[numColumnas*numFilas];
+    int contador=0;//para borrar
     for (int fila = 0; fila < numFilas; ++fila)
     {
         for (int columna = 0; columna < numColumnas; ++columna)
-        {   
+        {
             bool derecha=false,abajo=false;
             unsigned char ficha = FichaPorCoord(fila, columna, numColumnas, tablero);
             for (int  filtro1 = 0; filtro1 < 2; ++filtro1)
             {
                 int nuevaFila = fila + filtroUnoFilas[filtro1];
                 int nuevaColumna = columna + filtroUnoColumnas[filtro1];
-                 
+
                 if (nuevaFila >= 0 && nuevaFila < numFilas && nuevaColumna >= 0 && nuevaColumna < numColumnas) {// Validar que la celda vecina esté dentro de los límites del tablero
                     unsigned char fichaVecina = FichaPorCoord(nuevaFila, nuevaColumna, numColumnas, tablero);
                     if (fichaVecina == ficha){
                         for (int filtro2 = 0; filtro2 < 3; ++filtro2)
                         {   if (filtro1==0)
                             {
-                            abajo=true;
+                                abajo=true;
 
                             }
-                        
+
                             if (filtro1==1)
                             {
                                 if (!derecha)
@@ -853,36 +901,36 @@ bool hayCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero,in
                             }
                             int filaTemp= nuevaFila + filtroDosFilas[filtro2];
                             int columnaTemp= nuevaColumna + filtroDosColumnas[filtro2];
-                            
-                            
-                            if (filaTemp >= 0 && filaTemp < numFilas && columnaTemp>= 0 && columnaTemp < numColumnas) 
-                            {// Validar que la celda vecina esté dentro de los límites del tablero 
-                                
+
+
+                            if (filaTemp >= 0 && filaTemp < numFilas && columnaTemp>= 0 && columnaTemp < numColumnas)
+                            {// Validar que la celda vecina esté dentro de los límites del tablero
+
                                 unsigned char fichaVecinaTemp = FichaPorCoord(filaTemp, columnaTemp, numColumnas, tablero);// Obtener la ficha de la celda vecina con tu función FichaPorCoord
-                                
+
                                 if (fichaVecinaTemp == ficha || (derecha&abajo)==true)
                                 {
-                                    if (!existeEnArreglos(fila,columna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    if (!existeEnArreglos(fila,columna,contador,tempFilas,tempColumnas))
                                     {
                                         tempColumnas[contador]=columna;
-                                     //   tempFichas[contador]=ficha;
+                                        //   tempFichas[contador]=ficha;
                                         tempFilas[contador]=fila;
                                         contador++;
-                                    }    
-                                    if (!existeEnArreglos(nuevaFila,nuevaColumna, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    }
+                                    if (!existeEnArreglos(nuevaFila,nuevaColumna,contador,tempFilas,tempColumnas))
                                     {
                                         tempColumnas[contador]=nuevaColumna;
                                         tempFilas[contador]=nuevaFila;
-                                    //    tempFichas[contador]=fichaVecina;
+                                        //    tempFichas[contador]=fichaVecina;
                                         contador++;
-                                    }    
-                                    if (!existeEnArreglos(filaTemp,columnaTemp, numColumnas*numFilas,tempFilas,tempColumnas))
+                                    }
+                                    if (!existeEnArreglos(filaTemp,columnaTemp,contador,tempFilas,tempColumnas))
                                     {   if((derecha&abajo)==true){columnaTemp--;}
                                         tempColumnas[contador]=columnaTemp;
                                         tempFilas[contador]=filaTemp;
-                                      //  tempFichas[contador]=fichaVecinaTemp;
+                                        //  tempFichas[contador]=fichaVecinaTemp;
                                         contador++;
-                                    }   
+                                    }
                                 }
                             }
                         }
@@ -891,15 +939,16 @@ bool hayCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero,in
             }
         }
     }
-puntaje=puntaje+(contador*10);
+    puntaje=puntaje+(contador*10);
     // Liberar la memoria dinámica asignada
     delete[] tempFilas;
     delete[] tempColumnas;
-//    delete[] tempFichas;
-if (contador>=3){
-    return true;
-}else{
-    return false;
-}
+
+    //    delete[] tempFichas;
+    if (contador>=3){
+        return true;
+    }else{
+        return false;
+    }
 }
 #endif // FUNCIONESSWEETCRUSH_H
