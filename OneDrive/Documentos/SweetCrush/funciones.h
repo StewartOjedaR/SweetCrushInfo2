@@ -645,7 +645,7 @@ void borrarCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero
                                 
                                 unsigned char fichaVecinaTemp = FichaPorCoord(filaTemp, columnaTemp, numColumnas, tablero);// Obtener la ficha de la celda vecina con tu función FichaPorCoord
                                 
-                                if (fichaVecinaTemp == ficha || derecha&abajo==true)
+                                if (fichaVecinaTemp == ficha || (derecha&abajo)==true)
                                 {
                                     if (!existeEnArreglos(fila,columna, numColumnas*numFilas,tempFilas,tempColumnas))
                                     {
@@ -860,7 +860,7 @@ bool hayCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero,in
                                 
                                 unsigned char fichaVecinaTemp = FichaPorCoord(filaTemp, columnaTemp, numColumnas, tablero);// Obtener la ficha de la celda vecina con tu función FichaPorCoord
                                 
-                                if (fichaVecinaTemp == ficha || derecha&abajo==true)
+                                if (fichaVecinaTemp == ficha || (derecha&abajo)==true)
                                 {
                                     if (!existeEnArreglos(fila,columna, numColumnas*numFilas,tempFilas,tempColumnas))
                                     {
@@ -877,7 +877,7 @@ bool hayCoincidencias( int numFilas, int numColumnas, unsigned char *&tablero,in
                                         contador++;
                                     }    
                                     if (!existeEnArreglos(filaTemp,columnaTemp, numColumnas*numFilas,tempFilas,tempColumnas))
-                                    {   if(derecha&abajo==true){columnaTemp--;}
+                                    {   if((derecha&abajo)==true){columnaTemp--;}
                                         tempColumnas[contador]=columnaTemp;
                                         tempFilas[contador]=filaTemp;
                                       //  tempFichas[contador]=fichaVecinaTemp;
