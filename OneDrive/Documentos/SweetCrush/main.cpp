@@ -4,20 +4,34 @@ char basura;
 unsigned char *tablero=nullptr;
 bool continuarJuego=true;
 int accion, puntaje;
-int numColumnas = 7, numFilas = 7;
+
 
 using namespace std;
 int main() {
-
+  int numColumnas, numFilas;
   cout << "-----------Bienvenido a juego Sweet Crush!-----------" << endl << endl;
   cout << "    Por favor, ingresa el ancho del tablero: ";
+  cin >> numColumnas;
+ 
   while (numColumnas < 1) {
-    cout << "El ancho debe ser mayor a 1. Por favor, intenta de nuevo: ";
+    if (cin.fail()){
+      cin.clear();
+      cout << "Error: Debes ingresar un numero." << endl;
+      while (cin.get() != '\n') { 
+      }
+    }
+    cout << "El ancho debe ser un numero mayor a 1. Por favor, intenta de nuevo: ";
     cin >> numColumnas;
   }
-
   cout << "    Ahora, ingresa el alto del tablero: ";
+  cin >> numFilas;
   while (numFilas < 1) {
+      if (cin.fail()){
+          cin.clear();
+            cout << "Error: Debes ingresar un numero." << endl;
+          while (cin.get() != '\n') {
+          }
+      }
     cout << "El alto debe ser mayor a 1. Por favor, intenta de nuevo: ";
     cin >> numFilas;
   }
@@ -25,10 +39,11 @@ int main() {
   cout << endl << "Configurando tablero..." << endl;
   crearTablero(numFilas, numColumnas, tablero);
   rellenarTablero(numFilas, numColumnas, tablero);
-  cout << "Tablero configurado." << endl << "¡Listo para comenzar el juego!" << endl << " ¿Deseas jugar? (Si=s, No=n): ";
+  cout << "Tablero configurado." << endl;
+  cout << "Listo para comenzar el juego!" << endl << "Deseas jugar? (Si=s, No=n): ";
   
   char play = 's';
-  //cin>>play;
+  cin>>play;
   cout<<endl;
   while (play != 's' && play != 'n') {
     cout << endl << "Por favor, ingresa 's' para jugar o 'n' para salir: ";
@@ -36,20 +51,27 @@ int main() {
   }
 
   while (play == 's' && continuarJuego == true) {
+    system("clear");
     imprimirTablero(numFilas, numColumnas, tablero);
     cout<<"PUNTAJE: "<<puntaje<<endl;
     while (hayCoincidencias(numFilas, numColumnas, tablero, puntaje)) {
-      cout << "Match!!!" << endl << "Ingrese cualquier tecla para continuar: ";
-      cin >> basura;
+      cout << "Match!!!" << endl;
+//     cout << "Ingrese cualquier tecla para continuar: ";
+   //  cin >> basura;
+      esperarSegundos(2);
       borrarCoincidencias(numFilas, numColumnas, tablero);
+      system("clear");
       imprimirTablero(numFilas, numColumnas, tablero);
-      cout << "Ingrese cualquier tecla para continuar: ";
-      cin >> basura;
+   //   cout << "Ingrese cualquier tecla para continuar: ";
+    //  cin >> basura;
+      esperarSegundos(2);
       llenarHuecos(tablero, numFilas, numColumnas);
+      system("clear");
       imprimirTablero(numFilas, numColumnas, tablero);
       cout<<"PUNTAJE: "<<puntaje<<endl;
+      esperarSegundos(2);
     }
-
+    esperarSegundos(3);
     do {
       cout << "Acciones: 1: Eliminar Ficha"
            << endl << "          2: Borrar Fila"
@@ -58,6 +80,13 @@ int main() {
            << endl << "          5: Agregar Columna "
            << endl << "          6: Salir del juego" << endl << "ingresar opcion: ";
       cin >> accion;
+      if (cin.fail()){
+          cin.clear();
+          cout << "Error: Debes ingresar un numero." << endl;
+          while (cin.get() != '\n') {
+
+          }
+      }
       if (accion < 1 || accion > 6) {
         cout << "Ingrese una accion valida" << endl;
       }
@@ -70,29 +99,70 @@ int main() {
       case 1: {
         
         while (!confirmar) {
-          cout << "Ingrese las coordenadas de la ficha" << endl << "Fila: ";
-          cin >> tempFila;
-          cout << "Colunma: ";
-          cin >> tempColumna;
+            cout << "Ingrese las coordenadas de la ficha"<<endl;
+            cout<<"Ingrese la fila: ";
+            cin >> tempFila;
+            while (cin.fail()||tempFila<0 || tempFila>numFilas) {
+                if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar un numero." << endl;
+                  while (cin.get() != '\n') {
+                  }
+                }
+                if (tempFila>numFilas){
+                  
+                }
+                cout<<"Ingresa una fila valida: ";
+                cin>>tempFila;
+            }
+            cin.clear();
+            while (cin.get() != '\n') {
+                    }
+            cout << "Ingrese la colunma: ";
+            cin >> tempColumna;
+            while (tempColumna<0 || tempColumna>numColumnas || cin.fail());{
+                if (cin.fail()){
+                    cin.clear();
+                    cout << "Error: Debes ingresar un numero." << endl;
+                    while (cin.get() != '\n') {
+
+                    }
+                cout<<"Ingresa una columna valida: ";
+                cin >> tempColumna;
+
+            }
+          }
+          
           cout << "Eliminar la ficha " << '(' << tempFila << ',' << tempColumna << ')' << " : ";
           ImprimirFicha(tempFila, tempColumna, numColumnas, tablero);
           cout << endl << "Confirmar s/n: ";
           cin >> basura;
           while (basura != 's' && basura != 'n') {
+              if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar [s] o [n]." << endl;
+                  while (cin.get() != '\n') {
+
+                  }
+              }
             cout << endl << "Ingresa opcion valida Si:(s) No:(n) ";
             cin >> basura;
           }
           if (basura == 's') {
             borrarFicha(tablero, tempFila, tempColumna, numColumnas);
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
             aplicarGravedad(tablero,numFilas,numColumnas);
-            cout << "ingresa cualquier letra para continuar: ";
-            cin >> basura;
+ //           cout << "ingresa cualquier letra para continuar: ";
+   //         cin >> basura;
+          esperarSegundos(2);
             confirmar = true;
             break;
           }
           if (basura == 'n') {
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
+            esperarSegundos(2);
             continue;
           }
         }
@@ -111,19 +181,30 @@ int main() {
           cout << endl << "Confirmar s/n: ";
           cin >> basura;
           while (basura != 's' && basura != 'n') {
+              if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar [s] o [n]." << endl;
+                  while (cin.get() != '\n') {
+
+                  }
+              }
             cout << endl << "Ingresa opcion valida Si:(s) No:(n) ";
             cin >> basura;
           }
           if (basura == 's') {
             eliminarFila(tempFila, numFilas, numColumnas, tablero);
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
-            cout << "ingresa cualquier letra para continuar: ";
-            cin >> basura;
+     //       cout << "ingresa cualquier letra para continuar: ";
+       //     cin >> basura;
+            esperarSegundos(2);
             confirmar = true;
             break;
           }
           if (basura == 'n') {
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
+            esperarSegundos(2);
             continue;
           }
         }
@@ -142,19 +223,30 @@ int main() {
           cout << endl << "Confirmar s/n: ";
           cin >> basura;
           while (basura != 's' && basura != 'n') {
+              if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar [s] o [n]." << endl;
+                  while (cin.get() != '\n') {
+
+                  }
+              }
             cout << endl << "Ingresa opcion valida Si:(s) No:(n) ";
             cin >> basura;
           }
           if (basura == 's') {
             eliminarColumna(tempColumna, numFilas, numColumnas, tablero);
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
-            cout << "ingresa cualquier letra para continuar: ";
-            cin >> basura;
+    //        cout << "ingresa cualquier letra para continuar: ";
+      //      cin >> basura;
+           esperarSegundos(2);
             confirmar = true;
             break;
           }
           if (basura == 'n') {
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
+            esperarSegundos(2);
             continue;
           }
         }
@@ -173,19 +265,30 @@ int main() {
           cout << endl << "Confirmar s/n: ";
           cin >> basura;
           while (basura != 's' && basura != 'n') {
+              if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar [s] o [n]." << endl;
+                  while (cin.get() != '\n') {
+
+                  }
+              }
             cout << endl << "Ingresa opcion valida Si:(s) No:(n) ";
             cin >> basura;
           }
           if (basura == 's') {
             agregarFila(tempFila, numFilas, numColumnas, tablero);
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
-            cout << "ingresa cualquier letra para continuar: ";
-            cin >> basura;
+          //  cout << "ingresa cualquier letra para continuar: ";
+            //cin >> basura;
+            esperarSegundos(2);
             confirmar = true;
             break;
           }
           if (basura == 'n') {
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
+            esperarSegundos(2);
           }
         }
         break;
@@ -203,19 +306,30 @@ int main() {
           cout << endl << "Confirmar s/n: ";
           cin >> basura;
           while (basura != 's' && basura != 'n') {
+              if (cin.fail()){
+                  cin.clear();
+                  cout << "Error: Debes ingresar [s] o [n]." << endl;
+                  while (cin.get() != '\n') {
+
+                  }
+              }
             cout << endl << "Ingresa opcion valida Si:(s) No:(n) ";
             cin >> basura;
           }
           if (basura == 's') {
             agregarColumna(tempColumna, numFilas, numColumnas, tablero);
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
-            cout << "ingresa cualquier letra para continuar: ";
-            cin >> basura;
+            //cout << "ingresa cualquier letra para continuar: ";
+            //cin >> basura;
+            esperarSegundos(2);
             confirmar = true;
             break;
           }
           if (basura == 'n') {
+            system("clear");
             imprimirTablero(numFilas, numColumnas, tablero);
+            esperarSegundos(2);
           }
         }
         break;
@@ -231,7 +345,7 @@ int main() {
   }
 
   if (!continuarJuego) {
-    cout << "¡Hasta luego! " << endl;
+    cout<<"Su puntaje fue: "<<puntaje<<endl << "Hasta luego! " << endl;
   }
 
   delete tablero;

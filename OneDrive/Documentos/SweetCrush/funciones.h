@@ -1,7 +1,24 @@
 #ifndef FUNCIONES_H
 #define FUNCIONES_H
 #include <iostream>
+#include <ctime>
 using namespace std;
+void esperarSegundos(int t) {
+    time_t tiempoActual = time(nullptr);
+    time_t tiempoObjetivo = tiempoActual + t;
+
+    // Bucle que retiene la ejecución hasta que transcurran los segundos indicados
+    while (time(nullptr) < tiempoObjetivo) {
+        // El programa espera activamente aquí
+    }
+}
+void limpiarConsola() {
+#ifdef _WIN32
+    system("cls");  // Comando para Windows
+#else
+    system("clear"); // Comando para Linux / macOS
+#endif
+}
 bool existeEnArreglos(int fila, int columna, int tamano, int *tempFilas, int *tempColumnas) {
     for (int i = 0; i < tamano; i++) {
         if (tempColumnas[i] == columna  && tempFilas[i]== fila ) {
